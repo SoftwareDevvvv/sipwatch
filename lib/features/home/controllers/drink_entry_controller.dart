@@ -20,7 +20,7 @@ class DrinkEntryController extends GetxController {
   final RxInt totalWaterToday = 0.obs;
   final RxInt totalCoffeeToday = 0.obs;
   final RxInt totalAlcoholToday = 0.obs;
-  final RxInt totalCaffeineToday = 0.obs;
+  final RxDouble totalCaffeineToday = 0.0.obs;
 
   // Loading state
   final RxBool isLoading = false.obs;
@@ -101,7 +101,7 @@ class DrinkEntryController extends GetxController {
     totalWaterToday.value = 0;
     totalCoffeeToday.value = 0;
     totalAlcoholToday.value = 0;
-    totalCaffeineToday.value = 0;
+    totalCaffeineToday.value = 0.0;
 
     for (final drink in todayDrinks) {
       switch (drink.type) {
@@ -182,6 +182,7 @@ class DrinkEntryController extends GetxController {
       return null;
     }
   }
+
   // Update an existing drink
   Future<void> updateDrink(DrinkEntry updatedDrink) async {
     final index = allDrinks.indexWhere((drink) => drink.id == updatedDrink.id);
@@ -231,22 +232,22 @@ class DrinkEntryController extends GetxController {
   }
 
   // Get total caffeine for a specific date
-  int getTotalCaffeineForDate(DateTime date) {
+  double getTotalCaffeineForDate(DateTime date) {
     final drinks = getDrinksForDate(date);
     return drinks
         .where((drink) => drink.caffeine != null)
-        .fold(0, (sum, drink) => sum + (drink.caffeine ?? 0));
+        .fold(0.0, (sum, drink) => sum + (drink.caffeine ?? 0.0));
   }
 
   // Add methods to calculate stats for a specific date
-  Map<String, int> calculateStatsForDate(DateTime date) {
+  Map<String, dynamic> calculateStatsForDate(DateTime date) {
     final drinks = getDrinksForDate(date);
 
     // Calculate totals for this date
     int totalWater = 0;
     int totalCoffee = 0;
     int totalAlcohol = 0;
-    int totalCaffeine = 0;
+    double totalCaffeine = 0.0;
 
     for (final drink in drinks) {
       switch (drink.type) {
@@ -285,6 +286,7 @@ class DrinkEntryController extends GetxController {
     final int totalCoffee = stats['totalCoffee']!;
     final int totalAlcohol = stats['totalAlcohol']!;
     final int total = stats['totalVolume']!;
+    ;
 
     double waterPercentage = total > 0 ? (totalWater / total) * 100 : 0;
     double coffeePercentage = total > 0 ? (totalCoffee / total) * 100 : 0;

@@ -15,7 +15,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   // Get the settings controller
-  final SettingsController _settingsController = Get.find<SettingsController>();  String?
+  final SettingsController _settingsController = Get.find<SettingsController>();
+  String?
       _currentView; // null means showing main settings, otherwise shows specific screen
   final TextEditingController _nameController = TextEditingController();
 
@@ -79,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return weight * baseRequirement * activityMultiplier;
   }
+
   @override
   void initState() {
     super.initState();
@@ -89,14 +91,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // Load profile image if available
     if (_settingsController.userProfileImagePath.value.isNotEmpty) {
-      _selectedProfileImage = File(_settingsController.userProfileImagePath.value);
+      _selectedProfileImage =
+          File(_settingsController.userProfileImagePath.value);
     }
 
     // Initialize daily norm controllers
     _waterController.text = '${_settingsController.waterDailyGoal.value} ml';
     _coffeeController.text = '${_settingsController.coffeeDailyLimit.value} ml';
     _alcoholController.text =
-        '${_settingsController.alcoholDailyLimit.value} ml';    // Initialize notification settings
+        '${_settingsController.alcoholDailyLimit.value} ml'; // Initialize notification settings
     dailyNotification = _settingsController.dailyNotification.value;
     morningTips = _settingsController.morningTips.value;
     waterWarning = _settingsController.waterWarning.value;
@@ -220,7 +223,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               setState(() {
                 _currentView = 'body_fluid';
               });
-            },          ),
+            },
+          ),
           SizedBox(height: 16),
           // Only show test notifications in debug mode
           if (kDebugMode) ...[
@@ -315,7 +319,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),            GestureDetector(
+            const SizedBox(height: 8),
+            GestureDetector(
               onTap: _showImageSourceModal,
               child: Container(
                 height: 250,
@@ -325,7 +330,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 child: _selectedProfileImage != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusM),
                         child: Image.file(
                           _selectedProfileImage!,
                           fit: BoxFit.cover,
@@ -339,7 +345,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             image: AssetImage('assets/images/background.png'),
                             fit: BoxFit.cover,
                           ),
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.radiusM),
                         ),
                         child: Center(
                           child: Container(
@@ -362,14 +369,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 32), // Save button
             Center(
               child: SizedBox(
-                width: 120,                child: ElevatedButton(
+                width: 120,
+                child: ElevatedButton(
                   onPressed: () {
                     // Save personal information to settings controller
                     _settingsController.updatePersonalInfo(
                       name: _nameController.text.trim(),
                       profileImagePath: _selectedProfileImage?.path ?? '',
                     );
-                    
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Personal information saved'),
@@ -414,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Notification Settings',
               style: AppTextStyles.heading2,
             ),
-            const SizedBox(height: 24),            // Toggle switches
+            const SizedBox(height: 24), // Toggle switches
             _buildToggleItem('Daily Notification', dailyNotification, (value) {
               setState(() => dailyNotification = value);
             }),
@@ -440,7 +448,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 32), // Save button
             Center(
               child: SizedBox(
-                width: 120,                child: ElevatedButton(
+                width: 120,
+                child: ElevatedButton(
                   onPressed: () {
                     // Save all notification settings to the controller
                     _settingsController.updateNotificationSettings(
@@ -450,7 +459,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       coffee: coffeeWarning,
                       alcohol: alcoholWarning,
                     );
-                    
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Notification settings saved'),
@@ -1103,13 +1112,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
   Future<void> _pickImageFromGallery() async {
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 80,
       );
-      
+
       if (pickedFile != null) {
         setState(() {
           _selectedProfileImage = File(pickedFile.path);
@@ -1132,7 +1142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         source: ImageSource.camera,
         imageQuality: 80,
       );
-      
+
       if (pickedFile != null) {
         setState(() {
           _selectedProfileImage = File(pickedFile.path);

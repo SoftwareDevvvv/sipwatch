@@ -110,7 +110,8 @@ class _TodayScreenState extends State<TodayScreen> {
                       padding: const EdgeInsets.all(AppDimensions.paddingL),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [                          Flexible(
+                        children: [
+                          Flexible(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -228,7 +229,8 @@ class _TodayScreenState extends State<TodayScreen> {
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-      ),      child: Row(
+      ),
+      child: Row(
         children: [
           // Drink image or fallback icon
           drink.imageId != null && drink.imageId!.isNotEmpty
@@ -268,7 +270,7 @@ class _TodayScreenState extends State<TodayScreen> {
                   child: _buildDrinkTypeIcon(drink.type),
                 ),
           const SizedBox(width: AppDimensions.paddingS),
-          
+
           // Content group: image, title, amount, time, unique factor
           Expanded(
             flex: 3,
@@ -328,7 +330,8 @@ class _TodayScreenState extends State<TodayScreen> {
                 ),
               ],
             ),
-          ),          const SizedBox(width: AppDimensions.paddingXS),
+          ),
+          const SizedBox(width: AppDimensions.paddingXS),
 
           // Action buttons group
           Row(

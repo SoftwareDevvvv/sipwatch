@@ -96,10 +96,10 @@ class FluidController extends GetxController {
   }
 
   // Get total caffeine consumed today
-  int getTotalCaffeineToday() {
-    int totalCaffeine = 0;
+  double getTotalCaffeineToday() {
+    double totalCaffeine = 0.0;
     for (var entry in drinkEntries) {
-      if (entry.type == DrinkType.coffee) {
+      if (entry.type == DrinkType.coffee && entry.caffeine != null) {
         totalCaffeine += entry.caffeine!;
       }
     }

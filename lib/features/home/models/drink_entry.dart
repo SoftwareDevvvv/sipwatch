@@ -5,7 +5,8 @@ class DrinkEntry {
   final String id;
   String name;
   int volume; // in milliliters
-  int? caffeine; // in milligrams, null if not applicable
+  double?
+      caffeine; // in milligrams, null if not applicable (changed from int to double)
   double? alcoholPercentage; // as a percentage, null if not applicable
   String time; // store as a string in format HH:MM
   DateTime date; // to track which day the drink was consumed
@@ -88,7 +89,7 @@ class DrinkEntry {
   DrinkEntry copyWith({
     String? name,
     int? volume,
-    int? caffeine,
+    double? caffeine,
     double? alcoholPercentage,
     String? time,
     DateTime? date,

@@ -61,7 +61,7 @@ class SettingsController extends GetxController {
     // Make sure SharedPreferences is initialized
     if (!Get.isRegistered<SharedPreferences>()) {
       await _initPrefs();
-    }    // Load Personal Information
+    } // Load Personal Information
     userName.value = _prefs.getString('userName') ?? '';
     userProfileImagePath.value = _prefs.getString('userProfileImagePath') ?? '';
     userProfileImagePath.value = _prefs.getString('userProfileImagePath') ?? '';
@@ -89,7 +89,7 @@ class SettingsController extends GetxController {
     // Make sure SharedPreferences is initialized
     if (!Get.isRegistered<SharedPreferences>()) {
       await _initPrefs();
-    }    // Save Personal Information
+    } // Save Personal Information
     await _prefs.setString('userName', userName.value);
     await _prefs.setString('userProfileImagePath', userProfileImagePath.value);
     await _prefs.setString('userProfileImagePath', userProfileImagePath.value);
@@ -111,6 +111,7 @@ class SettingsController extends GetxController {
     await _prefs.setDouble('weight', weight.value);
     await _prefs.setString('activityLevel', activityLevel.value);
   }
+
   /// Update personal information and save to storage
   void updatePersonalInfo({String? name, String? profileImagePath}) {
     if (name != null) userName.value = name;

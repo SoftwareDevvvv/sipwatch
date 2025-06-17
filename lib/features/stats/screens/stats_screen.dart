@@ -89,13 +89,11 @@ class _StatsScreenState extends State<StatsScreen> {
                                   showTitles: true,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    final maxY =
-                                        _statsController.getWeeklyMaxY();
-                                    final interval = maxY ~/ 4;
+                                    final intervals = _statsController
+                                        .getWeeklyYAxisIntervals();
 
-                                    if (value % interval == 0 &&
-                                        value > 0 &&
-                                        value < maxY) {
+                                    // Only show values that are in our calculated intervals
+                                    if (intervals.contains(value.toInt())) {
                                       return Text(
                                         '${value.toInt()}ml',
                                         style: const TextStyle(
@@ -133,8 +131,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             ),
                             gridData: FlGridData(
                               show: true,
-                              horizontalInterval:
-                                  _statsController.getWeeklyMaxY() / 4,
+                              horizontalInterval: _getWeeklyGridInterval(),
                               getDrawingHorizontalLine: (value) {
                                 return const FlLine(
                                   color: Color(0xFFEEEEEE),
@@ -205,13 +202,11 @@ class _StatsScreenState extends State<StatsScreen> {
                                   showTitles: true,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    final maxY =
-                                        _statsController.getMonthlyMaxY();
-                                    final interval = maxY ~/ 4;
+                                    final intervals = _statsController
+                                        .getMonthlyYAxisIntervals();
 
-                                    if (value % interval == 0 &&
-                                        value > 0 &&
-                                        value < maxY) {
+                                    // Only show values that are in our calculated intervals
+                                    if (intervals.contains(value.toInt())) {
                                       return Text(
                                         '${value.toInt()}ml',
                                         style: const TextStyle(
@@ -249,8 +244,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             ),
                             gridData: FlGridData(
                               show: true,
-                              horizontalInterval:
-                                  _statsController.getMonthlyMaxY() / 4,
+                              horizontalInterval: _getMonthlyGridInterval(),
                               getDrawingHorizontalLine: (value) {
                                 return const FlLine(
                                   color: Color(0xFFEEEEEE),
@@ -399,5 +393,23 @@ class _StatsScreenState extends State<StatsScreen> {
     }
 
     return barGroups;
+  }
+
+  // Helper method to get grid interval for weekly chart
+  double _getWeeklyGridInterval() {
+    final intervals = _statsController.getWeeklyYAxisIntervals();
+    if (intervals.length <= 1) return 100.0;
+
+    // Calculate interval between consecutive values
+    return (intervals[1] - intervals[0]).toDouble();
+  }
+
+  // Helper method to get grid interval for monthly chart
+  double _getMonthlyGridInterval() {
+    final intervals = _statsController.getMonthlyYAxisIntervals();
+    if (intervals.length <= 1) return 250.0;
+
+    // Calculate interval between consecutive values
+    return (intervals[1] - intervals[0]).toDouble();
   }
 }

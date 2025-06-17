@@ -87,14 +87,13 @@ class StatsController extends GetxController {
     for (int i = 0; i < 7; i++) {
       final date = startOfWeek.add(Duration(days: i));
       final stats = _drinkEntryController.calculateStatsForDate(date);
-
       weeklyData.add({
         'date': date,
         'dayName': formatDayName(date),
-        'totalWater': stats['totalWater'] ?? 0,
-        'totalCoffee': stats['totalCoffee'] ?? 0,
-        'totalAlcohol': stats['totalAlcohol'] ?? 0,
-        'totalVolume': stats['totalVolume'] ?? 0,
+        'totalWater': stats['totalWater'] as int? ?? 0,
+        'totalCoffee': stats['totalCoffee'] as int? ?? 0,
+        'totalAlcohol': stats['totalAlcohol'] as int? ?? 0,
+        'totalVolume': stats['totalVolume'] as int? ?? 0,
       });
     }
   } // Update monthly data - divide month into exactly 4 segments
@@ -143,9 +142,9 @@ class StatsController extends GetxController {
       DateTime currentDay = segmentStartDate;
       while (!currentDay.isAfter(segmentEndDate)) {
         final stats = _drinkEntryController.calculateStatsForDate(currentDay);
-        totalWater += stats['totalWater'] ?? 0;
-        totalCoffee += stats['totalCoffee'] ?? 0;
-        totalAlcohol += stats['totalAlcohol'] ?? 0;
+        totalWater += (stats['totalWater'] as int? ?? 0);
+        totalCoffee += (stats['totalCoffee'] as int? ?? 0);
+        totalAlcohol += (stats['totalAlcohol'] as int? ?? 0);
 
         currentDay = currentDay.add(const Duration(days: 1));
       }
@@ -211,5 +210,85 @@ class StatsController extends GetxController {
 
     // Round up to nearest hundred for better visualization
     return ((maxVolume / 100).ceil() * 100 + 200).toInt();
+  }
+
+  // Calculate smart Y-axis intervals for weekly chart based on actual data
+  List<int> getWeeklyYAxisIntervals() {
+    final maxY = getWeeklyMaxY();
+
+    // If no data, return basic intervals
+    if (weeklyData.isEmpty || maxY <= 100) {
+      return [0, 250, 500, 750, 1000];
+    }
+
+    // Find the actual maximum consumed value (not the chart max)
+    int actualMax = 0;
+    for (final day in weeklyData) {
+      final totalVolume = day['totalVolume'] as int;
+      if (totalVolume > actualMax) {
+        actualMax = totalVolume;
+      }
+    }
+
+    // Create smart intervals based on actual consumption
+    return _calculateSmartIntervals(actualMax, maxY);
+  }
+
+  // Calculate smart Y-axis intervals for monthly chart based on actual data
+  List<int> getMonthlyYAxisIntervals() {
+    final maxY = getMonthlyMaxY();
+
+    // If no data, return basic intervals
+    if (monthlyData.isEmpty || maxY <= 100) {
+      return [0, 500, 1000, 1500, 2000];
+    }
+
+    // Find the actual maximum consumed value (not the chart max)
+    int actualMax = 0;
+    for (final week in monthlyData) {
+      final totalVolume = week['totalVolume'] as int;
+      if (totalVolume > actualMax) {
+        actualMax = totalVolume;
+      }
+    }
+
+    // Create smart intervals based on actual consumption
+    return _calculateSmartIntervals(actualMax, maxY);
+  }
+
+  // Helper method to calculate smart intervals
+  List<int> _calculateSmartIntervals(int actualMax, int chartMax) {
+    List<int> intervals = [0]; // Always start with 0
+
+    // If actual max is very small, use small increments
+    if (actualMax <= 500) {
+      for (int i = 100; i <= chartMax; i += 100) {
+        intervals.add(i);
+        if (intervals.length >= 6) break; // Limit to 6 intervals max
+      }
+    }
+    // Medium values
+    else if (actualMax <= 2000) {
+      for (int i = 250; i <= chartMax; i += 250) {
+        intervals.add(i);
+        if (intervals.length >= 6) break;
+      }
+    }
+    // Large values
+    else if (actualMax <= 5000) {
+      for (int i = 500; i <= chartMax; i += 500) {
+        intervals.add(i);
+        if (intervals.length >= 6) break;
+      }
+    }
+    // Very large values
+    else {
+      for (int i = 1000; i <= chartMax; i += 1000) {
+        intervals.add(i);
+        if (intervals.length >= 6) break;
+      }
+    }
+
+    return intervals;
   }
 }

@@ -39,7 +39,6 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
   final _amountController = TextEditingController();
   final _uniqueFactorAmountController = TextEditingController();
   final _commentsController = TextEditingController();
-
   late String selectedUniqueFactor = 'Caffeine';
   late DrinkType selectedDrinkType = DrinkType.coffee;
   late TimeOfDay selectedTime = TimeOfDay.now();
@@ -99,6 +98,12 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
         _selectDefaultImageForType(selectedDrinkType);
       }
     } else {
+      // For new drinks, automatically set the unique factor based on default drink type
+      if (selectedDrinkType == DrinkType.coffee) {
+        selectedUniqueFactor = 'Caffeine';
+      } else if (selectedDrinkType == DrinkType.alcohol) {
+        selectedUniqueFactor = 'Alcohol';
+      }
       _selectDefaultImageForType(selectedDrinkType);
     }
   }
@@ -160,6 +165,14 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
                             (value) {
                       setState(() {
                         selectedDrinkType = _getDrinkTypeFromString(value!);
+                        // Automatically set unique factor based on drink type
+                        if (selectedDrinkType == DrinkType.coffee) {
+                          selectedUniqueFactor = 'Caffeine';
+                        } else if (selectedDrinkType == DrinkType.alcohol) {
+                          selectedUniqueFactor = 'Alcohol';
+                        }
+                        // Clear the unique factor amount when changing drink type
+                        _uniqueFactorAmountController.clear();
                       });
                     })),
                     const SizedBox(width: AppDimensions.paddingM),
@@ -174,9 +187,7 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
                 Row(
                   children: [
                     if (selectedDrinkType != DrinkType.water)
-                      Expanded(
-                          child: _buildTextField('Amount of unique factor',
-                              _uniqueFactorAmountController, 'Enter amount')),
+                      Expanded(child: _buildUniqueFactorTextField()),
                     if (selectedDrinkType != DrinkType.water)
                       const SizedBox(width: AppDimensions.paddingM),
                     Expanded(child: _buildTimeField()),
@@ -292,6 +303,55 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
           controller: controller,
           maxLines: label == 'Comments' ? 4 : 1,
           keyboardType: isNumerical ? TextInputType.number : TextInputType.text,
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: AppColors.inputColor,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              borderSide: BorderSide(color: AppColors.inputBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              borderSide: BorderSide(color: AppColors.inputBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              borderSide: BorderSide(color: AppColors.inputBorder),
+            ),
+          ),
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  } // Specialized text field for unique factor with suffix in label
+
+  Widget _buildUniqueFactorTextField() {
+    String hint = 'Enter amount';
+    String label = 'Amount of unique factor';
+
+    if (selectedUniqueFactor == 'Caffeine') {
+      hint = 'Enter caffeine amount';
+      label = 'Amount of unique factor (mg)';
+    } else if (selectedUniqueFactor == 'Alcohol') {
+      hint = 'Enter alcohol percentage';
+      label = 'Amount of unique factor (%)';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: AppTextStyles.bodyMedium.copyWith(color: Color(0xFF00214D))),
+        const SizedBox(height: AppDimensions.paddingS),
+        TextFormField(
+          controller: _uniqueFactorAmountController,
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
@@ -649,32 +709,38 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
   void _saveDrink() {
     // Validate input
     if (_amountController.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter an amount',
-          snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter an amount'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     // Get the volume value
     final volume = int.tryParse(_amountController.text);
     if (volume == null || volume <= 0) {
-      Get.snackbar('Error', 'Please enter a valid amount',
-          snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a valid amount'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     } // Get the selected image (if any)
     String? imageId = null;
     if (_drinkImageController.drinkImages.isNotEmpty &&
         _drinkImageController.selectedImageId.value.isNotEmpty) {
       imageId = _drinkImageController.selectedImageId.value;
-    }
-
-    // Process additional fields based on drink type
-    int? caffeine;
+    } // Process additional fields based on drink type
+    double? caffeine;
     double? alcoholPercentage;
 
     if (selectedDrinkType != DrinkType.water &&
         _uniqueFactorAmountController.text.isNotEmpty) {
       if (selectedUniqueFactor == 'Caffeine') {
-        caffeine = int.tryParse(_uniqueFactorAmountController.text);
+        caffeine = double.tryParse(_uniqueFactorAmountController.text);
       } else if (selectedUniqueFactor == 'Alcohol') {
         alcoholPercentage = double.tryParse(_uniqueFactorAmountController.text);
       }
@@ -699,19 +765,25 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
       comments:
           _commentsController.text.isEmpty ? null : _commentsController.text,
       imageId: imageId,
-    );
-
-    // Save to the controller
+    ); // Save to the controller
     if (isEditMode) {
       _drinkEntryController.updateDrink(drink);
       Get.back();
-      Get.snackbar('Success', 'Drink updated successfully',
-          snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Drink updated successfully'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
     } else {
       _drinkEntryController.addDrink(drink);
       Get.back();
-      Get.snackbar('Success', 'Drink added successfully',
-          snackPosition: SnackPosition.BOTTOM);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Drink added successfully'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
     }
   }
 

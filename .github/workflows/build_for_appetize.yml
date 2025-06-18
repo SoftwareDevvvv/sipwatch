@@ -1,0 +1,50 @@
+name: Build iOS .app for Appetize
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_ios_app:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.4'
+
+      - name: Flutter clean & get packages
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: Clean iOS Pods
+        run: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          cd ..
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Build iOS .app bundle (unsigned)
+        run: flutter build ios --no-codesign
+
+      - name: Zip .app bundle for Appetize
+        run: |
+          cd build/ios/iphoneos
+          zip -r Runner.zip Runner.app
+
+      - name: Upload zipped .app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-appetize-app
+          path: build/ios/iphoneos/Runner.zip

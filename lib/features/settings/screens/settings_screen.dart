@@ -227,22 +227,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           SizedBox(height: 16),
           // Only show test notifications in debug mode
-          if (kDebugMode) ...[
-            _buildSettingsCard(
-              iconPath: 'assets/images/notification_icon.svg',
-              title: 'Test Notifications',
-              buttonText: 'Test',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NotificationTestScreen(),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 16),
-          ],
         ],
       ),
     );

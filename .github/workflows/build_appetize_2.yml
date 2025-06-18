@@ -1,0 +1,50 @@
+name: Build iOS Simulator App for Appetize
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_ios_simulator:
+    runs-on: macos-latest
+
+    steps:
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Set Up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.4'
+
+      - name: 🔄 Flutter Clean & Pub Get
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: 🧹 Clean iOS Pods
+        run: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          cd ..
+
+      - name: 📦 Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: 🛠️ Build iOS App for Simulator
+        run: flutter build ios --simulator --no-codesign
+
+      - name: 📁 Zip .app for Appetize
+        run: |
+          cd build/ios/iphonesimulator
+          zip -r Runner.zip Runner.app
+
+      - name: 📤 Upload Zipped Simulator App
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-app
+          path: build/ios/iphonesimulator/Runner.zip

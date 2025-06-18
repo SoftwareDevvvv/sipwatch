@@ -18,15 +18,20 @@ jobs:
         with:
           flutter-version: '3.32.4'
 
-      - name: Install Flutter dependencies
+      - name: Flutter clean & pub get
         run: |
           flutter clean
           flutter pub get
 
-      - name: Clean & prep iOS build
+      - name: Clean old iOS pods
         run: |
           cd ios
           rm -rf Pods Podfile.lock
+          cd ..
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
           pod install
           cd ..
 

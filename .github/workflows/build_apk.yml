@@ -1,0 +1,33 @@
+name: Build Android Release APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Set Up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.4'
+
+      - name: 🔄 Flutter Clean & Pub Get
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: 🛠️ Build Android APK (release)
+        run: flutter build apk --release
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

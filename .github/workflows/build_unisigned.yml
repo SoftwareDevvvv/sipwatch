@@ -1,0 +1,57 @@
+name: Build Unsigned iOS IPA
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🚀 Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.4'
+
+      - name: 🔄 Flutter clean & pub get
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: 🧹 Clean iOS Pods
+        run: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          cd ..
+
+      - name: 📦 Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: 🛠️ Build iOS unsigned IPA
+        run: |
+          flutter build ipa --no-codesign
+
+      - name: 📤 Upload Unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: build/ios/ipa/*.ipa
+
+      - name: 🧪 (Optional) Archive Raw .app for future signing
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r unsigned_Runner.ipa Payload
+        # If needed, you can also upload this:
+        # uses: actions/upload-artifact@v4
+        # with:
+        #   name: manual-unsigned-ipa
+        #   path: unsigned_Runner.ipa

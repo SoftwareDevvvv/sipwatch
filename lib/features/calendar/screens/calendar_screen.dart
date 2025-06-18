@@ -127,26 +127,68 @@ class _CalendarScreenState extends State<CalendarScreen> {
     DrinkType? drinkType,
     required Color color,
   }) {
+    // Get the daily norm percentage to determine which wave to show for both cards
+    final normPercentage = _drinkEntryController.getDailyNormPercentageForDate(
+        selectedDate.value, _settingsController.waterDailyGoal.value);
+
+    // Default wave assets for normal consumption
+    String waveAsset = 'assets/images/wave-blue-calendar.svg';
+    Color gradientColor = const Color(0xFF2A8CBC);
+
+    // Default card color when consumption is normal
+    Color cardColor = AppColors.cardBackground;
+
+    // Text color based on norm percentage
+    Color textColor = normPercentage < 100
+        ? AppColors.textSecondary
+        : AppColors.calendarTextColor;
+
+    // If consumption is above normal, use red wave for both cards
+    if (normPercentage > 100) {
+      waveAsset = 'assets/images/wave-red.svg';
+      gradientColor = const Color(0xFFBC2A2A);
+      cardColor =
+          color; // Use the provided color (AppColors.calendarCardColor) when above normal
+    }
+
     return Container(
       height: 120,
       decoration: BoxDecoration(
-        color: color,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Wave SVG at the bottom
+          // Wave SVG at the bottom - calendar specific waves
+          Positioned(
+            bottom: 3,
+            left: 0,
+            right: 0,
+            child: SvgPicture.asset(
+              waveAsset,
+              fit: BoxFit.contain,
+            ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: SvgPicture.asset(
-              'assets/images/wave-red.svg',
-              fit: BoxFit.contain,
+            child: Container(
+              height: 10,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [gradientColor, gradientColor],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(AppDimensions.radiusL),
+                  bottomRight: Radius.circular(AppDimensions.radiusL),
+                ),
+              ),
             ),
           ),
-
           // Content on top of the wave
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -155,8 +197,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.calendarTextColor,
+                  style: TextStyle(
+                    color: textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                   ),

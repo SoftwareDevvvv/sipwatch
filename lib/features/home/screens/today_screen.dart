@@ -80,28 +80,58 @@ class _TodayScreenState extends State<TodayScreen> {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Container for card - now positioned to fill entire card area
+                    // Container for card
                     Container(
                       width: double.infinity,
-                      height:
-                          130, // Added explicit height to ensure full coverage
+                      height: 130,
                       decoration: BoxDecoration(
-                        border:
-                            Border.all(color: AppColors.cardBorder, width: 2),
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusL),
-                        color: AppColors.cardBackground,
+                        color: _getDailyNormPercentage() > 100
+                            ? AppColors.calendarCardColor
+                            : AppColors.cardBackground,
                       ),
                     ),
 
-                    // Wave SVG at the bottom
+                    // Wave SVG at the bottom - choose based on consumption
+                    Positioned(
+                      bottom: 5,
+                      left: 0,
+                      right: 0,
+                      child: SvgPicture.asset(
+                        _getDailyNormPercentage() > 100
+                            ? 'assets/images/wave-red-today.svg'
+                            : 'assets/images/wave-blue.svg',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    // Gradient at bottom
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      child: SvgPicture.asset(
-                        'assets/images/wave-blue.svg',
-                        fit: BoxFit.contain,
+                      child: Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: _getDailyNormPercentage() > 100
+                                ? [
+                                    const Color(0xFFBC2A2A),
+                                    const Color(0xFFBC2A2A)
+                                  ]
+                                : [
+                                    const Color(0xFF2A92BC),
+                                    const Color(0xFF2A92BC)
+                                  ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(AppDimensions.radiusL),
+                            bottomRight: Radius.circular(AppDimensions.radiusL),
+                          ),
+                        ),
                       ),
                     ),
 
@@ -119,7 +149,9 @@ class _TodayScreenState extends State<TodayScreen> {
                                   'Total today',
                                   style: AppTextStyles.bodySmall.copyWith(
                                     fontWeight: FontWeight.w400,
-                                    color: AppColors.textSecondary,
+                                    color: _getDailyNormPercentage() < 100
+                                        ? AppColors.textSecondary
+                                        : AppColors.calendarTextColor,
                                   ),
                                 ),
                                 const SizedBox(height: AppDimensions.paddingS),
@@ -140,7 +172,9 @@ class _TodayScreenState extends State<TodayScreen> {
                                 Text(
                                   '% Of Daily Norm',
                                   style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.textSecondary,
+                                    color: _getDailyNormPercentage() < 100
+                                        ? AppColors.textSecondary
+                                        : AppColors.calendarTextColor,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),

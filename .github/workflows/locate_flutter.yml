@@ -1,2 +1,2 @@
-- name: Locate Flutter SDK
-  run: flutter --version --machine
+name: Locate Flutter SDK
+run: flutter --version --machine

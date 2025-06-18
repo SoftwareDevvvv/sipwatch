@@ -1,16 +1,45 @@
-# sipwatch
+# SipWatch
 
-A new Flutter project.
+A Flutter hydration tracking app that helps users monitor daily fluid intake with smart notifications and personalized goals.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Drink Tracking**: Water, coffee, tea, alcohol with custom images and volumes
+- **Analytics**: Daily/weekly/monthly consumption charts and calendar view
+- **Smart Goals**: Personalized hydration targets based on body metrics
+- **Notifications**: Daily reminders and health tips
+- **Cross-Platform**: Android, iOS
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter** 3.5.4+ with Dart
+- **GetX** for state management
+- **SharedPreferences** for data storage
+- **Image Picker** for custom drink photos
+- **Flutter local notifications** for notifications
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Quick Start
+
+```bash
+# Clone and setup
+git clone (https://github.com/SoftwareDevvvv/sipwatch.git/)
+cd sipwatch
+flutter pub get
+
+# Run app
+flutter run
+
+# Build releases
+flutter build apk --release        # Android APK
+flutter build appbundle --release  # Android AAB
+flutter build ios --release        # iOS
+```
+
+
+
+### App Details
+- **Package**: `com.SipWatch.SW2905`
+- **Min SDK**: 26 (Android 8.0)
+- **Target SDK**: 34 (Android 14)
+- **iOS**: 13.0+
+

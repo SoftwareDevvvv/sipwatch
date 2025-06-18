@@ -23,33 +23,18 @@ jobs:
           flutter clean
           flutter pub get
 
-      - name: Clean & install CocoaPods
+      - name: Clean & prep iOS build
         run: |
           cd ios
           rm -rf Pods Podfile.lock
           pod install
           cd ..
 
-      - name: Build iOS without code signing
-        run: flutter build ios --no-codesign
+      - name: Build IPA
+        run: flutter build ipa --no-codesign
 
-      - name: Archive app using xcodebuild
-        run: |
-          xcodebuild -workspace ios/Runner.xcworkspace \
-                     -scheme Runner \
-                     -configuration Release \
-                     -sdk iphoneos \
-                     -archivePath ${{ github.workspace }}/build/Runner.xcarchive archive
-
-      - name: Export IPA
-        run: |
-          xcodebuild -exportArchive \
-                     -archivePath ${{ github.workspace }}/build/Runner.xcarchive \
-                     -exportOptionsPlist ios/ExportOptions.plist \
-                     -exportPath ${{ github.workspace }}/build/Runner.ipa
-
-      - name: Upload IPA artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
-          path: build/Runner.ipa
+          path: build/ios/ipa/*.ipa

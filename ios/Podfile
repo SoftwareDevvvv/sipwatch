@@ -1,27 +1,16 @@
 platform :ios, '13.0'
 
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-def flutter_root
-  `flutter --version --machine`.then do |json_str|
-    require 'json'
-    json = JSON.parse(json_str)
-    return json["flutterRoot"] if json.key?("flutterRoot")
-    # fallback or raise error if not found
-    raise "Flutter root not found"
-  end
-end
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
 
-flutter_root = `flutter --version --machine`.then do |json_str|
-  require 'json'
-  json = JSON.parse(json_str)
-  json["flutterRoot"] if json.key?("flutterRoot")
-end
-
-unless flutter_root && !flutter_root.empty?
-  raise "Could not find flutter SDK path"
-end
-
+# Manually specify the Flutter SDK root in CI (GitHub Actions)
+flutter_root = ENV['CI'] ? '/Users/runner/hostedtoolcache/flutter/stable-3.32.4-arm64' : File.expand_path('../flutter', __dir__)
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
 target 'Runner' do
@@ -30,4 +19,3 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
-

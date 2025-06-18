@@ -10,11 +10,10 @@ import '../../../core/services/notification_service.dart';
 class SettingsController extends GetxController {
   // Personal Information
   final RxString userName = ''.obs;
-  final RxString userProfileImagePath = ''.obs;
-
-  // Notification Settings
+  final RxString userProfileImagePath = ''.obs; // Notification Settings
   final RxBool dailyNotification = true.obs;
-  final RxBool morningTips = false.obs;
+  final RxBool morningTips =
+      false.obs; // Keep disabled by default - user controls this
   final RxBool waterWarning = false.obs;
   final RxBool coffeeWarning = false.obs;
   final RxBool alcoholWarning = false.obs;
@@ -64,11 +63,11 @@ class SettingsController extends GetxController {
     } // Load Personal Information
     userName.value = _prefs.getString('userName') ?? '';
     userProfileImagePath.value = _prefs.getString('userProfileImagePath') ?? '';
-    userProfileImagePath.value = _prefs.getString('userProfileImagePath') ?? '';
-
-    // Load Notification Settings
+    userProfileImagePath.value = _prefs.getString('userProfileImagePath') ??
+        ''; // Load Notification Settings
     dailyNotification.value = _prefs.getBool('dailyNotification') ?? true;
-    morningTips.value = _prefs.getBool('morningTips') ?? false;
+    morningTips.value = _prefs.getBool('morningTips') ??
+        false; // Keep default false - user choice
     waterWarning.value = _prefs.getBool('waterWarning') ?? false;
     coffeeWarning.value = _prefs.getBool('coffeeWarning') ?? false;
     alcoholWarning.value = _prefs.getBool('alcoholWarning') ?? false;

@@ -50,6 +50,59 @@ class NotificationService extends GetxController {
       // Initialize timezone data
       tz.initializeTimeZones();
 
+      // Set local timezone with better detection
+      try {
+        // Common timezone mappings for different regions
+        final String systemTimeZone = DateTime.now().timeZoneName;
+        String? locationName;
+
+        // Try to map common timezone abbreviations to full names
+        switch (systemTimeZone) {
+          case 'GMT':
+          case 'UTC':
+            locationName = 'UTC';
+            break;
+          case 'EST':
+          case 'EDT':
+            locationName = 'America/New_York';
+            break;
+          case 'PST':
+          case 'PDT':
+            locationName = 'America/Los_Angeles';
+            break;
+          case 'CST':
+          case 'CDT':
+            locationName = 'America/Chicago';
+            break;
+          case 'MST':
+          case 'MDT':
+            locationName = 'America/Denver';
+            break;
+          default:
+            // Try to use the system timezone name directly
+            try {
+              final location = tz.getLocation(systemTimeZone);
+              tz.setLocalLocation(location);
+              print('NotificationService: Timezone set to $systemTimeZone');
+              locationName = null; // Already set
+            } catch (e) {
+              // Fall back to UTC if specific timezone fails
+              locationName = 'UTC';
+              print(
+                  'NotificationService: Unknown timezone $systemTimeZone, using UTC');
+            }
+        }
+
+        if (locationName != null) {
+          final location = tz.getLocation(locationName);
+          tz.setLocalLocation(location);
+          print('NotificationService: Timezone set to $locationName');
+        }
+      } catch (e) {
+        print('NotificationService: Timezone setup failed, using UTC: $e');
+        tz.setLocalLocation(tz.UTC);
+      }
+
       // Android initialization settings
       const AndroidInitializationSettings initializationSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -73,7 +126,12 @@ class NotificationService extends GetxController {
       await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
         onDidReceiveNotificationResponse: _onNotificationTapped,
-      ); // Request permissions
+      );
+
+      // Create notification channels for Android
+      await _createNotificationChannels();
+
+      // Request permissions
       await _requestPermissions();
 
       // Initialize SharedPreferences
@@ -84,6 +142,9 @@ class NotificationService extends GetxController {
 
       // Set up daily reset timer
       _startMidnightTimer();
+
+      // Schedule morning tips if enabled
+      await scheduleDailyMorningTip();
 
       print('NotificationService: Initialized successfully');
     } catch (e) {
@@ -120,22 +181,28 @@ class NotificationService extends GetxController {
 
   /// Schedule daily morning tip notification
   Future<void> scheduleDailyMorningTip() async {
-    final settingsController = Get.find<SettingsController>();
-
-    // Check if daily notifications and morning tips are enabled
-    if (!settingsController.dailyNotification.value ||
-        !settingsController.morningTips.value) {
-      await cancelMorningTip();
-      return;
-    }
-
     try {
+      final settingsController = Get.find<SettingsController>();
+
+      // Check if daily notifications and morning tips are enabled
+      if (!settingsController.dailyNotification.value ||
+          !settingsController.morningTips.value) {
+        await cancelMorningTip();
+        print('NotificationService: Morning tips disabled in settings');
+        return;
+      }
+
+      // Cancel any existing morning tip notifications first
+      await cancelMorningTip();
+
       // Schedule for 8:00 AM daily
+      final scheduledDate = _nextInstanceOf8AM();
+      print('NotificationService: Scheduling morning tip for $scheduledDate');
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         morningTipNotificationId,
         'Good Morning! 🌅',
         _getRandomMorningTip(),
-        _nextInstanceOf8AM(),
+        scheduledDate,
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'morning_tips',
@@ -143,7 +210,6 @@ class NotificationService extends GetxController {
             channelDescription: 'Daily morning hydration tips',
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
-            icon: 'ic_notification',
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,
@@ -157,7 +223,7 @@ class NotificationService extends GetxController {
         matchDateTimeComponents: DateTimeComponents.time,
       );
 
-      print('NotificationService: Morning tip scheduled for 8:00 AM');
+      print('NotificationService: Morning tip scheduled for 8:00 AM daily');
     } catch (e) {
       print('NotificationService: Failed to schedule morning tip - $e');
     }
@@ -179,6 +245,11 @@ class NotificationService extends GetxController {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
+    print('NotificationService: Current time: $now');
+    print('NotificationService: Next 8 AM scheduled for: $scheduledDate');
+    print(
+        'NotificationService: Time until notification: ${scheduledDate.difference(now)}');
+
     return scheduledDate;
   }
 
@@ -193,6 +264,21 @@ class NotificationService extends GetxController {
       "Green tea is a great hydrating alternative to coffee! 🍵",
       "Remember: if you feel thirsty, you're already dehydrated!",
       "Fruits like watermelon contribute to your daily hydration! 🍉",
+      "Drink water first thing when you wake up! ☀️",
+      "Herbal teas count towards your fluid intake! 🌿",
+      "Coconut water is nature's sports drink! 🥥",
+      "Add lemon to your water for extra flavor and vitamin C! 🍋",
+      "Room temperature water is easier for your body to absorb! 🌡️",
+      "Cucumber water is refreshing and hydrating! 🥒",
+      "Your brain is 75% water - keep it hydrated for better focus! 🧠",
+      "Drink a glass of water before each meal! 🍽️",
+      "Sparkling water counts towards your daily intake too! ✨",
+      "Keep a water bottle with you throughout the day! 🍼",
+      "Eat water-rich foods like oranges and lettuce! 🥬",
+      "Cold water can boost your metabolism slightly! ❄️",
+      "Drink extra water when you're sick! 🤒",
+      "Replace one coffee with water today! ☕➡️💧",
+      "Your skin will thank you for staying hydrated! ✨",
     ];
 
     return tips[DateTime.now().millisecond % tips.length];
@@ -413,7 +499,6 @@ class NotificationService extends GetxController {
             channelDescription: 'Test notifications for debugging',
             importance: Importance.high,
             priority: Priority.high,
-            icon: '@drawable/ic_notification',
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,
@@ -425,6 +510,139 @@ class NotificationService extends GetxController {
       print('NotificationService: Test notification sent');
     } catch (e) {
       print('NotificationService: Failed to show test notification - $e');
+    }
+  }
+
+  /// Show immediate morning tip (for testing)
+  Future<void> showTestMorningTip() async {
+    try {
+      await _flutterLocalNotificationsPlugin.show(
+        998, // Test morning tip ID
+        'Test Morning Tip 🌅',
+        _getRandomMorningTip(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'morning_tips',
+            'Morning Tips',
+            channelDescription: 'Daily morning hydration tips',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+      );
+      print('NotificationService: Test morning tip shown immediately');
+    } catch (e) {
+      print('NotificationService: Failed to show test morning tip - $e');
+    }
+  }
+
+  /// Schedule a test morning tip in 5 seconds (for testing)
+  Future<void> scheduleTestMorningTipIn5Seconds() async {
+    try {
+      // Cancel any existing test notification first
+      await _flutterLocalNotificationsPlugin.cancel(997);
+
+      // Schedule for 5 seconds from now
+      final tz.TZDateTime scheduledDate =
+          tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+
+      print(
+          'NotificationService: Scheduling test morning tip for $scheduledDate (in 5 seconds)');
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        997, // Test scheduled notification ID
+        'Test Scheduled Morning Tip 🌅',
+        _getRandomMorningTip(),
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'morning_tips',
+            'Morning Tips',
+            channelDescription: 'Daily morning hydration tips',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      print(
+          'NotificationService: Test morning tip scheduled for 5 seconds from now');
+    } catch (e) {
+      print('NotificationService: Failed to schedule test morning tip - $e');
+    }
+  }
+
+  /// Get pending notifications (for debugging)
+  Future<void> checkPendingNotifications() async {
+    try {
+      final List<PendingNotificationRequest> pendingNotifications =
+          await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+
+      print(
+          'NotificationService: Found ${pendingNotifications.length} pending notifications:');
+      for (final notification in pendingNotifications) {
+        print(
+            '  - ID: ${notification.id}, Title: ${notification.title}, Body: ${notification.body}');
+      }
+    } catch (e) {
+      print('NotificationService: Failed to check pending notifications - $e');
+    }
+  }
+
+  /// Create notification channels for Android
+  Future<void> _createNotificationChannels() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+          _flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidPlugin != null) {
+        // Morning tips channel
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'morning_tips',
+            'Morning Tips',
+            description: 'Daily morning hydration tips',
+            importance: Importance.defaultImportance,
+          ),
+        );
+
+        // Test notifications channel
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'test_notifications',
+            'Test Notifications',
+            description: 'Test notifications for debugging',
+            importance: Importance.high,
+          ),
+        );
+
+        // Warning notifications channel
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'consumption_warnings',
+            'Consumption Warnings',
+            description: 'Warnings when consumption limits are exceeded',
+            importance: Importance.high,
+          ),
+        );
+
+        print('NotificationService: Android notification channels created');
+      }
     }
   }
 }

@@ -66,11 +66,20 @@ class _StatsScreenState extends State<StatsScreen> {
                       // Legend
                       Row(
                         children: [
-                          _buildLegendItem('💧', 'Water', AppColors.water),
-                          const SizedBox(width: 24),
-                          _buildLegendItem('🟠', 'Coffee', AppColors.coffee),
-                          const SizedBox(width: 24),
-                          _buildLegendItem('🔴', 'Alcohol', AppColors.alcohol),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '💧', 'Water', AppColors.water),
+                          ),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '🟠', 'Coffee', AppColors.coffee),
+                          ),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '🔴', 'Alcohol', AppColors.alcohol),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -179,11 +188,20 @@ class _StatsScreenState extends State<StatsScreen> {
                       // Legend
                       Row(
                         children: [
-                          _buildLegendItem('💧', 'Water', AppColors.water),
-                          const SizedBox(width: 24),
-                          _buildLegendItem('🟠', 'Coffee', AppColors.coffee),
-                          const SizedBox(width: 24),
-                          _buildLegendItem('🔴', 'Alcohol', AppColors.alcohol),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '💧', 'Water', AppColors.water),
+                          ),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '🟠', 'Coffee', AppColors.coffee),
+                          ),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: _buildLegendItem(
+                                '🔴', 'Alcohol', AppColors.alcohol),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -272,19 +290,22 @@ class _StatsScreenState extends State<StatsScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 25,
-          height: 25,
+          width: 20,
+          height: 20,
           child: SvgPicture.asset(
             'assets/images/drop.svg',
             colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
           ),
         ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF1B365D),
-            fontSize: 14,
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF1B365D),
+              fontSize: 12,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

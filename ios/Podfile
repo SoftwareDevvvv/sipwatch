@@ -21,6 +21,7 @@ def flutter_root
   raise "FLUTTER_ROOT not found in #{generated}"
 end
 
+puts "Flutter root: #{flutter_root}"
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
 flutter_ios_podfile_setup

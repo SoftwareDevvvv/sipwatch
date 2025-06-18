@@ -1,8 +1,24 @@
 platform :ios, '13.0'
 
-flutter_root = File.expand_path('../flutter', __dir__)
+flutter_root = ENV['FLUTTER_ROOT']
+
+if flutter_root.nil? || flutter_root.empty?
+  require 'json'
+  begin
+    flutter_version_output = `flutter --version --machine`
+    flutter_info = JSON.parse(flutter_version_output)
+    flutter_root = flutter_info['flutterRoot']
+  rescue => e
+    puts "Warning: Could not determine Flutter SDK path automatically: #{e}"
+  end
+end
+
+flutter_root ||= '../flutter'  # fallback path
+
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
+
+# --- Your Runner target ---
 target 'Runner' do
   use_frameworks!
   use_modular_headers!

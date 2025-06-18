@@ -1,25 +1,32 @@
 platform :ios, '13.0'
 
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+# Flutter-specific Podfile helper, do NOT hardcode the path, let Flutter handle it
 def flutter_root
-  root = ENV['FLUTTER_ROOT']
-  return root unless root.nil? || root.empty?
+  @flutter_root ||= begin
+    generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+    unless File.exist?(generated_xcode_build_settings_path)
+      raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+    end
 
-  # Try to get Flutter SDK root by calling `flutter --version --machine`
-  require 'json'
-  flutter_version_json = `flutter --version --machine`
-  if $?.success?
-    json = JSON.parse(flutter_version_json)
-    return json['flutterRoot'] if json.key?('flutterRoot')
+    File.foreach(generated_xcode_build_settings_path) do |line|
+      matches = line.match(/FLUTTER_ROOT\=(.*)/)
+      return matches[1].strip if matches
+    end
+    raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}."
   end
-
-  # Fallback
-  '../flutter'
 end
 
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
-
-# --- Your Runner target ---
 target 'Runner' do
   use_frameworks!
   use_modular_headers!

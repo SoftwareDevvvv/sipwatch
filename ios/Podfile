@@ -1,28 +1,25 @@
 platform :ios, '13.0'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-project 'Runner', {
-  'Debug' => :debug,
-  'Profile' => :release,
-  'Release' => :release,
-}
-
-# Flutter-specific Podfile helper, do NOT hardcode the path, let Flutter handle it
 def flutter_root
-  @flutter_root ||= begin
-    generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-    unless File.exist?(generated_xcode_build_settings_path)
-      raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
-    end
-
-    File.foreach(generated_xcode_build_settings_path) do |line|
-      matches = line.match(/FLUTTER_ROOT\=(.*)/)
-      return matches[1].strip if matches
-    end
-    raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}."
+  `flutter --version --machine`.then do |json_str|
+    require 'json'
+    json = JSON.parse(json_str)
+    return json["flutterRoot"] if json.key?("flutterRoot")
+    # fallback or raise error if not found
+    raise "Flutter root not found"
   end
+end
+
+flutter_root = `flutter --version --machine`.then do |json_str|
+  require 'json'
+  json = JSON.parse(json_str)
+  json["flutterRoot"] if json.key?("flutterRoot")
+end
+
+unless flutter_root && !flutter_root.empty?
+  raise "Could not find flutter SDK path"
 end
 
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
@@ -33,3 +30,4 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
+

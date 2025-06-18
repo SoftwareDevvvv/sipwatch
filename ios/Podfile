@@ -1,19 +1,20 @@
 platform :ios, '13.0'
 
-flutter_root = ENV['FLUTTER_ROOT']
+fdef flutter_root
+  root = ENV['FLUTTER_ROOT']
+  return root unless root.nil? || root.empty?
 
-if flutter_root.nil? || flutter_root.empty?
+  # Try to get Flutter SDK root by calling `flutter --version --machine`
   require 'json'
-  begin
-    flutter_version_output = `flutter --version --machine`
-    flutter_info = JSON.parse(flutter_version_output)
-    flutter_root = flutter_info['flutterRoot']
-  rescue => e
-    puts "Warning: Could not determine Flutter SDK path automatically: #{e}"
+  flutter_version_json = `flutter --version --machine`
+  if $?.success?
+    json = JSON.parse(flutter_version_json)
+    return json['flutterRoot'] if json.key?('flutterRoot')
   end
-end
 
-flutter_root ||= '../flutter'  # fallback path
+  # Fallback
+  '../flutter'
+end
 
 load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 

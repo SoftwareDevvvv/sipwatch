@@ -1,6 +1,6 @@
 platform :ios, '13.0'
 
-fdef flutter_root
+def flutter_root
   root = ENV['FLUTTER_ROOT']
   return root unless root.nil? || root.empty?
 

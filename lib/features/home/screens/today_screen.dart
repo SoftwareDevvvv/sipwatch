@@ -87,26 +87,23 @@ class _TodayScreenState extends State<TodayScreen> {
                       decoration: BoxDecoration(
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusL),
-                        color: _getDailyNormPercentage() > 100
-                            ? AppColors.calendarCardColor
-                            : AppColors.cardBackground,
+                        color: AppColors
+                            .cardBackground, // Always use card background
                       ),
                     ),
 
-                    // Wave SVG at the bottom - choose based on consumption
+                    // Wave SVG at the bottom - always use blue wave
                     Positioned(
                       bottom: 5,
                       left: 0,
                       right: 0,
                       child: SvgPicture.asset(
-                        _getDailyNormPercentage() > 100
-                            ? 'assets/images/wave-red-today.svg'
-                            : 'assets/images/wave-blue.svg',
+                        'assets/images/wave-blue.svg', // Always use blue wave
                         fit: BoxFit.contain,
                       ),
                     ),
 
-                    // Gradient at bottom
+                    // Gradient at bottom - always use blue gradient
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -115,15 +112,10 @@ class _TodayScreenState extends State<TodayScreen> {
                         height: 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: _getDailyNormPercentage() > 100
-                                ? [
-                                    const Color(0xFFBC2A2A),
-                                    const Color(0xFFBC2A2A)
-                                  ]
-                                : [
-                                    const Color(0xFF2A92BC),
-                                    const Color(0xFF2A92BC)
-                                  ],
+                            colors: [
+                              const Color(0xFF2A92BC), // Always use blue
+                              const Color(0xFF2A92BC)
+                            ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           ),
@@ -149,9 +141,8 @@ class _TodayScreenState extends State<TodayScreen> {
                                   'Total today',
                                   style: AppTextStyles.bodySmall.copyWith(
                                     fontWeight: FontWeight.w400,
-                                    color: _getDailyNormPercentage() < 100
-                                        ? AppColors.textSecondary
-                                        : AppColors.calendarTextColor,
+                                    color: AppColors
+                                        .textSecondary, // Always use secondary text color
                                   ),
                                 ),
                                 const SizedBox(height: AppDimensions.paddingS),
@@ -172,9 +163,8 @@ class _TodayScreenState extends State<TodayScreen> {
                                 Text(
                                   '% Of Daily Norm',
                                   style: AppTextStyles.bodySmall.copyWith(
-                                    color: _getDailyNormPercentage() < 100
-                                        ? AppColors.textSecondary
-                                        : AppColors.calendarTextColor,
+                                    color: AppColors
+                                        .textSecondary, // Always use secondary text color
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),

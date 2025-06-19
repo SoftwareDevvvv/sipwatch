@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../controllers/settings_controller.dart';
 import '../../debugging/notification_test_screen.dart';
@@ -18,11 +16,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsController _settingsController = Get.find<SettingsController>();
   String?
       _currentView; // null means showing main settings, otherwise shows specific screen
-  final TextEditingController _nameController = TextEditingController();
-
-  // Profile image state
-  File? _selectedProfileImage;
-  final ImagePicker _imagePicker = ImagePicker();
 
   // Notification settings state
   bool dailyNotification = true;
@@ -86,14 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
 
     // Initialize controllers with values from SettingsController
-    _nameController.text = _settingsController.userName.value;
     _weightController.text = _settingsController.weight.value.toString();
-
-    // Load profile image if available
-    if (_settingsController.userProfileImagePath.value.isNotEmpty) {
-      _selectedProfileImage =
-          File(_settingsController.userProfileImagePath.value);
-    }
 
     // Initialize daily norm controllers
     _waterController.text = '${_settingsController.waterDailyGoal.value} ml';
@@ -183,17 +169,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         children: [
           _buildSettingsCard(
-            iconPath: 'assets/images/person.svg',
-            title: 'Personal Information',
-            buttonText: 'Edit',
-            onTap: () {
-              setState(() {
-                _currentView = 'personal_info';
-              });
-            },
-          ),
-          SizedBox(height: 16),
-          _buildSettingsCard(
             iconPath: 'assets/images/notification_icon.svg',
             title: 'Notification settings',
             buttonText: 'Edit',
@@ -248,8 +223,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildCurrentView() {
     switch (_currentView) {
-      case 'personal_info':
-        return _buildPersonalInfoContent();
       case 'notifications':
         return _buildNotificationContent();
       case 'daily_norm':
@@ -259,153 +232,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       default:
         return _buildMainSettings();
     }
-  }
-
-  Widget _buildPersonalInfoContent() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Screen title
-            Text(
-              'Personal Information',
-              style: AppTextStyles.heading2,
-            ),
-            const SizedBox(height: 24),
-            // Name field
-            const Text(
-              'Name',
-              style: TextStyle(
-                color: Color(0xFF1B365D),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.inputColor,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-                border: Border.all(color: AppColors.inputBorder, width: 1),
-              ),
-              child: TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your name',
-                  border: InputBorder.none,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  hintStyle: TextStyle(
-                    color: Color(0xFF1B365D),
-                    fontSize: 16,
-                  ),
-                ),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Photo field
-            const Text(
-              'Photo',
-              style: TextStyle(
-                color: Color(0xFF1B365D),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _showImageSourceModal,
-              child: Container(
-                height: 250,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-                  border: Border.all(color: AppColors.inputBorder, width: 1),
-                ),
-                child: _selectedProfileImage != null
-                    ? ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(AppDimensions.radiusM),
-                        child: Image.file(
-                          _selectedProfileImage!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/background.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius:
-                              BorderRadius.circular(AppDimensions.radiusM),
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 32), // Save button
-            Center(
-              child: SizedBox(
-                width: 120,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Save personal information to settings controller
-                    _settingsController.updatePersonalInfo(
-                      name: _nameController.text.trim(),
-                      profileImagePath: _selectedProfileImage?.path ?? '',
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Personal information saved'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF29B6F6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusM),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildNotificationContent() {
@@ -965,195 +791,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
-  }
-
-  void _showImageSourceModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle bar
-                Container(
-                  margin: const EdgeInsets.only(top: 16),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                // Title
-                const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'Add Profile Photo',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1B365D),
-                    ),
-                  ),
-                ),
-
-                // Options
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      _buildImageSourceOption(
-                        icon: Icons.photo_library,
-                        title: 'Choose from Gallery',
-                        subtitle: 'Select an existing photo',
-                        onTap: () {
-                          Navigator.pop(context);
-                          _pickImageFromGallery();
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      _buildImageSourceOption(
-                        icon: Icons.camera_alt,
-                        title: 'Take Photo',
-                        subtitle: 'Use camera to take a new photo',
-                        onTap: () {
-                          Navigator.pop(context);
-                          _pickImageFromCamera();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.inputColor,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-          border: Border.all(color: AppColors.inputBorder),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-              ),
-              child: Icon(
-                icon,
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.textSecondary,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        setState(() {
-          _selectedProfileImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      print('Error picking image from gallery: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to pick image from gallery'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        setState(() {
-          _selectedProfileImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      print('Error taking photo with camera: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to take photo'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 }

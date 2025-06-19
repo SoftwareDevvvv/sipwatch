@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../features/home/widgets/body_silhouette_painter.dart';
 import '../../features/home/widgets/human_silhouette_fill.dart';
 
 class ConsumptionData {
@@ -64,10 +65,19 @@ class DailyConsumptionGraph extends StatelessWidget {
       child: Row(
         children: [
           // Human body with liquid fill
-          HumanSilhouetteFill(
-            waterPercentage: waterPercentage,
-            coffeePercentage: coffeePercentage,
-            alcoholPercentage: alcoholPercentage,
+          // Human body with liquid fill
+          SizedBox(
+            height: 200, // or any appropriate fixed height
+            child: AspectRatio(
+              aspectRatio: 1 / 2.459,
+              child: CustomPaint(
+                painter: BodySilhouettePainter(
+                  waterPercentage: waterPercentage,
+                  coffeePercentage: coffeePercentage,
+                  alcoholPercentage: alcoholPercentage,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: AppDimensions.paddingXL),
 

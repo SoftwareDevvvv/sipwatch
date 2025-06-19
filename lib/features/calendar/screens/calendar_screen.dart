@@ -127,28 +127,49 @@ class _CalendarScreenState extends State<CalendarScreen> {
     DrinkType? drinkType,
     required Color color,
   }) {
-    // Get the daily norm percentage to determine which wave to show for both cards
-    final normPercentage = _drinkEntryController.getDailyNormPercentageForDate(
-        selectedDate.value, _settingsController.waterDailyGoal.value);
+    // Get the most consumed drink type to determine wave and gradient
+    final mostConsumedType =
+        _drinkEntryController.getMostConsumedTypeForDate(selectedDate.value);
 
-    // Default wave assets for normal consumption
+    // Get the daily norm percentage for text color
+    final normPercentage = _drinkEntryController.getDailyNormPercentageForDate(
+        selectedDate.value,
+        _settingsController.waterDailyGoal
+            .value); // Default wave assets and colors based on most consumed drink type
     String waveAsset = 'assets/images/wave-blue-calendar.svg';
     Color gradientColor = const Color(0xFF2A8CBC);
-
-    // Default card color when consumption is normal
     Color cardColor = AppColors.cardBackground;
+    Color titleTextColor = AppColors.textSecondary; // Default title text color
 
-    // Text color based on norm percentage
-    Color textColor = normPercentage < 100
-        ? AppColors.textSecondary
-        : AppColors.calendarTextColor;
-
-    // If consumption is above normal, use red wave for both cards
-    if (normPercentage > 100) {
-      waveAsset = 'assets/images/wave-red.svg';
-      gradientColor = const Color(0xFFBC2A2A);
-      cardColor =
-          color; // Use the provided color (AppColors.calendarCardColor) when above normal
+    // Change wave, gradient, card color, and text color based on most consumed drink type
+    if (mostConsumedType != null) {
+      switch (mostConsumedType) {
+        case DrinkType.water:
+          waveAsset = 'assets/images/wave-blue-calendar.svg';
+          gradientColor = const Color(0xFF2A8CBC);
+          cardColor = const Color(0xFFE3F2FD); // Light blue card for water
+          titleTextColor = const Color(0xFF1565C0); // Darker blue for text
+          break;
+        case DrinkType.coffee:
+          waveAsset =
+              'assets/images/wave-yellow-calendar.svg'; // TODO: Add this asset
+          gradientColor = const Color(0xFFBC692A); // Orange color
+          cardColor = const Color(0xFFFFF3E0); // Light orange card for coffee
+          titleTextColor = const Color(0xFFE65100); // Darker orange for text
+          break;
+        case DrinkType.alcohol:
+          waveAsset = 'assets/images/wave-red.svg';
+          gradientColor = const Color(0xFFBC2A2A);
+          cardColor = const Color(0xFFFFEBEE); // Light red card for alcohol
+          titleTextColor = const Color(0xFFC62828); // Darker red for text
+          break;
+        case DrinkType.other:
+          waveAsset = 'assets/images/wave-blue-calendar.svg';
+          gradientColor = const Color(0xFF2A8CBC);
+          cardColor = const Color(0xFFF5F5F5); // Light gray card for other
+          titleTextColor = const Color(0xFF424242); // Dark gray for text
+          break;
+      }
     }
 
     return Container(
@@ -198,7 +219,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: textColor,
+                    color: titleTextColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                   ),

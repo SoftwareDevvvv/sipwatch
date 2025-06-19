@@ -8,9 +8,7 @@ import '../../../core/services/notification_service.dart';
 /// This controller handles all settings-related functionality like saving,
 /// loading, and providing access to user preferences.
 class SettingsController extends GetxController {
-  // Personal Information
-  final RxString userName = ''.obs;
-  final RxString userProfileImagePath = ''.obs; // Notification Settings
+  // Notification Settings
   final RxBool dailyNotification = true.obs;
   final RxBool morningTips =
       false.obs; // Keep disabled by default - user controls this
@@ -60,11 +58,7 @@ class SettingsController extends GetxController {
     // Make sure SharedPreferences is initialized
     if (!Get.isRegistered<SharedPreferences>()) {
       await _initPrefs();
-    } // Load Personal Information
-    userName.value = _prefs.getString('userName') ?? '';
-    userProfileImagePath.value = _prefs.getString('userProfileImagePath') ?? '';
-    userProfileImagePath.value = _prefs.getString('userProfileImagePath') ??
-        ''; // Load Notification Settings
+    } // Load Notification Settings
     dailyNotification.value = _prefs.getBool('dailyNotification') ?? true;
     morningTips.value = _prefs.getBool('morningTips') ??
         false; // Keep default false - user choice
@@ -88,12 +82,7 @@ class SettingsController extends GetxController {
     // Make sure SharedPreferences is initialized
     if (!Get.isRegistered<SharedPreferences>()) {
       await _initPrefs();
-    } // Save Personal Information
-    await _prefs.setString('userName', userName.value);
-    await _prefs.setString('userProfileImagePath', userProfileImagePath.value);
-    await _prefs.setString('userProfileImagePath', userProfileImagePath.value);
-
-    // Save Notification Settings
+    } // Save Notification Settings
     await _prefs.setBool('dailyNotification', dailyNotification.value);
     await _prefs.setBool('morningTips', morningTips.value);
     await _prefs.setBool('waterWarning', waterWarning.value);
@@ -109,13 +98,6 @@ class SettingsController extends GetxController {
     await _prefs.setString('gender', gender.value);
     await _prefs.setDouble('weight', weight.value);
     await _prefs.setString('activityLevel', activityLevel.value);
-  }
-
-  /// Update personal information and save to storage
-  void updatePersonalInfo({String? name, String? profileImagePath}) {
-    if (name != null) userName.value = name;
-    if (profileImagePath != null) userProfileImagePath.value = profileImagePath;
-    saveSettings();
   }
 
   /// Update notification settings and save to storage

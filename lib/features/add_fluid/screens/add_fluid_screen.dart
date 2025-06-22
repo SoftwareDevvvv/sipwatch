@@ -130,6 +130,36 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Back button at the top
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: 80,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF29B6F6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.radiusM),
+                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      child: Text(
+                        'Back',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.paddingM),
+
                 Text(isEditMode ? 'Fluid Edit' : 'Fluid addition',
                     style: AppTextStyles.heading3),
                 const SizedBox(
@@ -342,12 +372,21 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
       hint = 'Enter alcohol percentage';
       label = 'Amount of unique factor (%)';
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: AppTextStyles.bodyMedium.copyWith(color: Color(0xFF00214D))),
+        Container(
+          height: 45, // Fixed height for alignment with time field
+          alignment:
+              Alignment.center, // Center alignment for better visual balance
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(color: Color(0xFF00214D)),
+            maxLines: 2, // Allow text to wrap to 2 lines if needed
+            overflow:
+                TextOverflow.visible, // Changed to visible for better rendering
+          ),
+        ),
         const SizedBox(height: AppDimensions.paddingS),
         TextFormField(
           controller: _uniqueFactorAmountController,
@@ -383,9 +422,15 @@ class _FluidAdditionScreenState extends State<FluidAdditionScreen> {
   Widget _buildTimeField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Time',
-            style: AppTextStyles.bodyMedium.copyWith(color: Color(0xFF00214D))),
+        Container(
+          height: 45, // Increased height to match the unique factor label area
+          child: Text(
+            'Time',
+            style: AppTextStyles.bodyMedium.copyWith(color: Color(0xFF00214D)),
+          ),
+        ),
         const SizedBox(height: AppDimensions.paddingS),
         GestureDetector(
           onTap: _showTimePicker,

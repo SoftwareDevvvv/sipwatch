@@ -201,7 +201,7 @@ class AppTheme {
           textStyle: AppTextStyles.buttonText,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
